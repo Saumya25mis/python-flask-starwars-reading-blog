@@ -8,8 +8,8 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User
-#from models import Person
+from models import db, User, Character, Planet
+
 
 app = Flask(__name__)
 app.url_map.strict_slashes = False
@@ -30,14 +30,62 @@ def handle_invalid_usage(error):
 def sitemap():
     return generate_sitemap(app)
 
+
+# >> User endpoints: 
 @app.route('/user', methods=['GET'])
-def handle_hello():
+def handle_all_user():
+    return jsonify(User.get_all_users()), 200
 
+@app.route('/user/<int:id>', methods=['GET'])
+def handle_get_user(id):
+    return jsonify(User.get_user(id)), 200
+
+@app.route('/user/<int:id>', methods=['DELETE'])
+def handle_delete_user(id):
+    User.delete_user(id)
     response_body = {
-        "msg": "Hello, this is your GET /user response "
+         "msg": "User delete successful",
     }
-
     return jsonify(response_body), 200
+
+
+# >> Character endpoints: 
+@app.route('/character', methods=['GET'])
+def handle_all_character():
+    return jsonify(Character.get_all_characters()), 200
+
+@app.route('/character/<int:id>', methods=['GET'])
+def handle_get_character(id):
+    return jsonify(Character.get_character(id)), 200
+
+@app.route('/character/<int:id>', methods=['DELETE'])
+def handle_delete_character(id):
+    Character.delete_character(id)
+    response_body = {
+         "msg": "Character delete successful",
+    }
+    return jsonify(response_body), 200
+
+
+# >> Planet endpoints: 
+@app.route('/planet', methods=['GET'])
+def handle_all_planet():
+    return jsonify(Planet.get_all_planets()), 200
+
+@app.route('/planet/<int:id>', methods=['GET'])
+def handle_get_planet(id):
+    return jsonify(Planet.get_planet(id)), 200
+
+@app.route('/planet/<int:id>', methods=['DELETE'])
+def handle_delete_planet(id):
+    Planet.delete_planet(id)
+    response_body = {
+         "msg": "Planet delete successful",
+    }
+    return jsonify(response_body), 200
+
+
+
 
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
