@@ -2,17 +2,22 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
+# For each 'model` I have to declare a class with the model properties 
+# and a method `serialize` that returns a dictionary representation of the class
+
 class User(db.Model):
     __tablename__ = "user"
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(120), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(80), unique=False, nullable=False)
-    is_active = db.Column(db.Boolean(), unique=False, nullable=False)
+    is_active = db.Column(db.Boolean(), unique=False, nullable=False, default=True)
 
+    # __repr__():  tell python how to print the class object on the console
     def __repr__(self):
         return '<User %r>' % self.username
 
+    # serialize(): tell python how convert the class object into a dictionary ready to jsonify
     def serialize(self):
         return {
             "id": self.id,
@@ -21,20 +26,12 @@ class User(db.Model):
             # do not serialize the password, its a security breach
         }
     
-    def get_all_users():
-        all_users = User.query.all()
-        all_users = list(map(lambda x: x.serialize(), all_users)) 
-        return all_users
-    
-    def get_user(id):
-        user = User.query.get(id).serialize()
-        return user
-    
-    def delete_user(id):
-        user = User.query.get(id)
-        db.session.delete(user)
-        db.session.commit()
-    
+
+class Favorite(db.Model):
+    __tablename__ = "favorite"
+    id = db.Column(db.Integer, primary_key=True)
+    favorites = db.relationship("Character", lazy=True)
+
 
 class Character(db.Model):
     __tablename__ = "character"
@@ -46,6 +43,7 @@ class Character(db.Model):
     eye_color = db.Column(db.String(50), unique=False, nullable=False)
     hair_color = db.Column(db.String(50), unique=False, nullable=False)
     skin_color = db.Column(db.String(50), unique=False, nullable=False)
+    favorite_id = db.Column(db.Integer, db.ForeignKey(Favorite.id)) # One to Many
 
     def __repr__(self):
         return '<Character %r>' % self.name
@@ -62,19 +60,6 @@ class Character(db.Model):
             "skin_color": self.skin_color
         }
 
-    def get_all_characters():
-        all_characters = Character.query.all()
-        all_characters = list(map(lambda x: x.serialize(), all_characters)) 
-        return all_characters
-
-    def get_character(id):
-        character = Character.query.get(id).serialize()
-        return character
-
-    def delete_character(id):
-        character = Character.query.get(id)
-        db.session.delete(character)
-        db.session.commit()
 
 class Planet(db.Model):
     __tablename__ = "planet"
@@ -100,17 +85,5 @@ class Planet(db.Model):
             "rotation_period": self.rotation_period
         }
     
-    def get_all_planets():
-        all_planets = Planet.query.all()
-        all_planets = list(map(lambda x: x.serialize(), all_planets)) 
-        return all_planets
-    
-    def get_planet(id):
-        planet = Planet.query.get(id).serialize()
-        return planet
 
-    def delete_planet(id):
-        planet = Planet.query.get(id)
-        db.session.delete(planet)
-        db.session.commit()
     
