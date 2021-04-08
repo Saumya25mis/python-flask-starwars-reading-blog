@@ -8,12 +8,12 @@ from flask_swagger import swagger #not used in this exercise
 from flask_cors import CORS #to avoid CORS (Cross-Origin Resource Sharing) domain errors 
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User, Character, Planet
+from models import db, User, Character, Planet, Favorite
 
 
 app = Flask(__name__)    #create new Flask app
 app.url_map.strict_slashes = False    #to allow URL with or without final slash "/"
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DB_CONNECTION_STRING')  #connect to database specified in file: .env.example
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DB_CONNECTION_STRING')  #connect to database specified in file: .env
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False   #if "true", everytime I modify models.py it creates a migration
 MIGRATE = Migrate(app, db)
 db.init_app(app)
@@ -25,7 +25,7 @@ setup_admin(app)
 def handle_invalid_usage(error):
     return jsonify(error.to_dict()), error.status_code
 
-# generate sitemap with all your endpoints
+# Generate sitemap with all your endpoints
 @app.route('/')
 def sitemap():
     return generate_sitemap(app)
@@ -224,6 +224,13 @@ def delete_planet(id):
     return jsonify(response_body), 200
 
 
+### Favorite endpoints:
+@app.route('/favorite', methods=['GET'])
+def get_all_favorite():
+    all_favorites = Favorite.query.all()
+    all_favorites = list(map(lambda x: x.serialize(), all_favorites)) 
+    return jsonify(all_favorites), 200
+
 
 # These two lines should always be at the end of the main.py file.
 # Meaning: only runs if `$ python src/main.py` is executed
@@ -232,5 +239,3 @@ if __name__ == '__main__':
     app.run(host='0.0.0.0', port=PORT, debug=False)
 
 
-
-# run program with $ pipenv run python src/main.py or $ pipenv run start

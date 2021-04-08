@@ -13,9 +13,24 @@ class User(db.Model):
     password = db.Column(db.String(80), unique=False, nullable=False)
     is_active = db.Column(db.Boolean(), unique=False, nullable=False, default=True)
 
-    # __repr__():  tell python how to print the class object on the console
+    favorites = db.relationship('Favorite', backref='user', lazy=True) # One to Many
+
+    # What does db.relationship() do? 
+    # That function returns a new property that can do multiple things. 
+    # In this case, it points to the Favorite class and loads multiple of those. 
+    # How does it know that this will return more than one favorite? (One-to-Many)
+    # Because SQLAlchemy guesses a useful default from the declaration. 
+    # For a One-to-One relationship we can pass 'uselist=False' to relationship().
+
+    # What do backref and lazy mean? 
+    # backref is a simple way to declare a new property on the Character or Planet class. 
+    # lazy defines when SQLAlchemy will load the data from the database. 
+    # By default, SQLAlchemy will load the data as necessary in one go using a standard select statement.
+
+
+    # __repr__():  tell python how to print the class object in the console
     def __repr__(self):
-        return '<User %r>' % self.username
+        return '<User: %r>' % self.username
 
     # serialize(): tell python how convert the class object into a dictionary ready to jsonify
     def serialize(self):
@@ -30,7 +45,17 @@ class User(db.Model):
 class Favorite(db.Model):
     __tablename__ = "favorite"
     id = db.Column(db.Integer, primary_key=True)
-    favorites = db.relationship("Character", lazy=True)
+    item_id = db.Column(db.Integer, unique=False, nullable=False) # store character_id or planet_id
+    item_type = db.Column(db.String(80), unique=False, nullable=False) # type can be Character or Planet
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "item_id": self.item_id, 
+            "item_type": self.item_type
+        }
 
 
 class Character(db.Model):
@@ -43,10 +68,9 @@ class Character(db.Model):
     eye_color = db.Column(db.String(50), unique=False, nullable=False)
     hair_color = db.Column(db.String(50), unique=False, nullable=False)
     skin_color = db.Column(db.String(50), unique=False, nullable=False)
-    favorite_id = db.Column(db.Integer, db.ForeignKey(Favorite.id)) # One to Many
 
     def __repr__(self):
-        return '<Character %r>' % self.name
+        return '<Character: %r>' % self.name
 
     def serialize(self):
         return {
@@ -72,7 +96,7 @@ class Planet(db.Model):
     rotation_period = db.Column(db.Float, unique=False, nullable=False)
 
     def __repr__(self):
-        return '<Planet %r>' % self.name
+        return '<Planet: %r>' % self.name
 
     def serialize(self):
         return {
