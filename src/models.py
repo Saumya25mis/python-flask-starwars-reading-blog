@@ -68,6 +68,7 @@ class Character(db.Model):
     eye_color = db.Column(db.String(50), unique=False, nullable=False)
     hair_color = db.Column(db.String(50), unique=False, nullable=False)
     skin_color = db.Column(db.String(50), unique=False, nullable=False)
+    item_type = db.Column(db.String(50), unique=False, nullable=False)
 
     def __repr__(self):
         return '<Character: %r>' % self.name
@@ -81,7 +82,8 @@ class Character(db.Model):
             "height": self.height,
             "eye_color": self.eye_color,
             "hair_color": self.hair_color,
-            "skin_color": self.skin_color
+            "skin_color": self.skin_color,
+            "item_type": self.item_type
         }
 
 
@@ -94,6 +96,7 @@ class Planet(db.Model):
     diameter = db.Column(db.Float, unique=False, nullable=False)
     climate = db.Column(db.String(50), unique=False, nullable=False)
     rotation_period = db.Column(db.Float, unique=False, nullable=False)
+    item_type = db.Column(db.String(50), unique=False, nullable=False)
 
     def __repr__(self):
         return '<Planet: %r>' % self.name
@@ -106,7 +109,8 @@ class Planet(db.Model):
             "terrain": self.terrain,
             "diameter": self.diameter,
             "climate": self.climate,
-            "rotation_period": self.rotation_period
+            "rotation_period": self.rotation_period,
+            "item_type": self.item_type
         }
     
 

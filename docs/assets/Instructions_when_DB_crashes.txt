@@ -1,0 +1,23 @@
+WHEN DATABASE STOPS WORKING:
+
+1. Delete migrations file
+
+2. Run $ mysql -u root
+
+mysql> DROP TABLE alembic_version;DRTAOP TA alemb_vb_v_version;
+
+mysql> USE example;
+Database changed
+
+mysql> DROP TABLE alembic_version;
+Query OK, 0 rows affected (0.09 sec)
+
+mysql> exit
+Bye
+
+3. Run:
+
+$ pipenv run init
+$ pipenv run migrate
+$ pipenv run upgrade
+$ pipenv run start
