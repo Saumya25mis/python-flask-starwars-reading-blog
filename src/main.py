@@ -1,24 +1,35 @@
 """
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
-import os
+import os # library in phyton that allows me to interact with the operating system (os)
 from flask import Flask, request, jsonify, url_for
 from flask_migrate import Migrate
-from flask_swagger import swagger #not used in this exercise
-from flask_cors import CORS #to avoid CORS (Cross-Origin Resource Sharing) domain errors 
+from flask_swagger import swagger # not used in this exercise
+from flask_cors import CORS # to avoid CORS (Cross-Origin Resource Sharing) domain errors 
 from utils import APIException, generate_sitemap
 from admin import setup_admin
 from models import db, User, Character, Planet, Favorite
+#from service import Service
+
+# import Flask-JWT-Extended extension library
+from flask_jwt_extended import create_access_token
+from flask_jwt_extended import get_jwt_identity
+from flask_jwt_extended import jwt_required
+from flask_jwt_extended import JWTManager
 
 
-app = Flask(__name__)    #create new Flask app
-app.url_map.strict_slashes = False    #to allow URL with or without final slash "/"
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DB_CONNECTION_STRING')  #connect to database specified in file: .env
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False   #if "true", everytime I modify models.py it creates a migration
+app = Flask(__name__)    # create new Flask app
+app.url_map.strict_slashes = False    # to allow URL with or without final slash "/"
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DB_CONNECTION_STRING')  # connect to database specified in file: .env
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False   # if "true", everytime I modify models.py it creates a migration
 MIGRATE = Migrate(app, db)
 db.init_app(app)
 CORS(app)
 setup_admin(app)
+
+# Setup the Flask-JWT-Extended extension
+app.config["JWT_SECRET_KEY"] = os.environ.get('TOKEN_KEY')  # for security purposes, located in .env file, which is also located in .gitignore
+jwt = JWTManager(app)
 
 # Handle/serialize errors like a JSON object
 @app.errorhandler(APIException)
@@ -30,6 +41,22 @@ def handle_invalid_usage(error):
 def sitemap():
     return generate_sitemap(app)
 
+# Create a route to authenticate your users and return JWTs. The
+# create_access_token() function is used to actually generate the JWT.
+@app.route("/token", methods=["POST"])
+def create_token():
+    username = request.json.get("username", None)
+    password = request.json.get("password", None)
+
+    user = User.query.filter_by(username=username, password=password).first()
+
+    if user is None:
+         return jsonify({"msg": "Bad username or password"}), 401
+    
+    print("Authorized user: ", user)
+
+    access_token = create_access_token(identity=user.id) # this line indicates that function get_jwt_identity() returns "user.id"
+    return jsonify(access_token=access_token)
 
 ### User endpoints [GET, POST, PUT, UPDATE]: 
 @app.route('/user', methods=['GET'])
@@ -226,10 +253,38 @@ def delete_planet(id):
 
 ### Favorite endpoints:
 @app.route('/favorite', methods=['GET'])
+@jwt_required()
 def get_all_favorite():
-    all_favorites = Favorite.query.all()
-    all_favorites = list(map(lambda x: x.serialize(), all_favorites)) 
+    
+    # Access the identity of the current user with get_jwt_identity
+    current_user_id = get_jwt_identity()
+
+    all_favorites = Service.get_favorites(current_user_id)
     return jsonify(all_favorites), 200
+
+@app.route('/favorite', methods=['POST'])
+def add_favorite():
+    request_body = request.get_json()
+    favorite = Favorite(item_id=request_body["item_id"], item_type=request_body["item_type"], user_id=request_body["user_id"])
+    db.session.add(favorite)
+    db.session.commit()
+    print("Favorite added: ", request_body)
+    return jsonify(request_body), 200
+
+@app.route('/favorite/<int:id>', methods=['DELETE'])
+def delete_favorite(id):
+    favorite = Favorite.query.get(id)
+
+    if favorite is None:
+        raise APIException('Favorite not found', status_code=404)
+
+    db.session.delete(favorite)
+    db.session.commit()
+    response_body = {
+         "msg": "Favorite delete successful",
+    }
+    return jsonify(response_body), 200
+
 
 
 # These two lines should always be at the end of the main.py file.
