@@ -1,4 +1,3 @@
-from flask import jsonify
 from models import db, User, Character, Planet, Favorite
 
 class bcolors:

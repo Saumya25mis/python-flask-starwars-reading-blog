@@ -45,10 +45,16 @@ def sitemap():
 # create_access_token() function is used to actually generate the JWT.
 @app.route("/token", methods=["POST"])
 def create_token():
-    username = request.json.get("username", None)
+    username = request.json.get("username", None) # "None" parameter, see below
     password = request.json.get("password", None)
 
+    # None parameter is used to create a conditional in case no values are passed. 
+    # Example: 
+    # if username is None:
+    #     return jsonify({msg: "value not found"})  
+
     user = User.query.filter_by(username=username, password=password).first()
+    # Filter() method filters the records before we fire the select with all() or first()
 
     if user is None:
          return jsonify({"msg": "Bad username or password"}), 401
@@ -269,6 +275,7 @@ def get_all_favorite():
     return jsonify(all_favorites), 200
 
 @app.route('/favorite', methods=['POST'])
+@jwt_required()
 def add_favorite():
     request_body = request.get_json()
     favorite = Favorite(item_id=request_body["item_id"], item_type=request_body["item_type"], user_id=request_body["user_id"])
@@ -278,6 +285,7 @@ def add_favorite():
     return jsonify(request_body), 200
 
 @app.route('/favorite/<int:id>', methods=['DELETE'])
+@jwt_required()
 def delete_favorite(id):
     favorite = Favorite.query.get(id)
 
