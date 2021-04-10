@@ -9,7 +9,7 @@ from flask_cors import CORS # to avoid CORS (Cross-Origin Resource Sharing) doma
 from utils import APIException, generate_sitemap
 from admin import setup_admin
 from models import db, User, Character, Planet, Favorite
-#from service import Service
+from service import Service
 
 # import Flask-JWT-Extended extension library
 from flask_jwt_extended import create_access_token
@@ -256,8 +256,14 @@ def delete_planet(id):
 @jwt_required()
 def get_all_favorite():
     
-    # Access the identity of the current user with get_jwt_identity
+    # Access the identity of the current user with get_jwt_identity()
     current_user_id = get_jwt_identity()
+
+    user = User.query.get(current_user_id)
+    if user is None:
+        raise APIException('User not found', status_code=404)
+    
+    all_favorites = Favorite.query.all()
 
     all_favorites = Service.get_favorites(current_user_id)
     return jsonify(all_favorites), 200
