@@ -1,5 +1,6 @@
 from models import db, User, Character, Planet, Favorite
 
+# to print with colors in the console
 class bcolors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -33,7 +34,8 @@ class Service:
             raise APIException('User not found', status_code=404)
 
         #search favorites from the user
-        all_favorites = Favorite.query.all()
+        #all_favorites = Favorite.query.all()
+        all_favorites = Favorite.query.filter_by(user_id=user_id).all()
 
         #turn ids into planet_id or character_id
         all_favorites = list(map(lambda x: Service.get_favorite_per_type(x), all_favorites)) 

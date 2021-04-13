@@ -45,7 +45,7 @@ def sitemap():
 # create_access_token() function is used to actually generate the JWT.
 @app.route("/token", methods=["POST"])
 def create_token():
-    username = request.json.get("username", None) # "None" parameter, see below
+    email = request.json.get("email", None) # "None" parameter, see below
     password = request.json.get("password", None)
 
     # None parameter is used to create a conditional in case no values are passed. 
@@ -53,7 +53,7 @@ def create_token():
     # if username is None:
     #     return jsonify({msg: "value not found"})  
 
-    user = User.query.filter_by(username=username, password=password).first()
+    user = User.query.filter_by(email=email, password=password).first()
     # Filter() method filters the records before we fire the select with all() or first()
 
     if user is None:
@@ -144,7 +144,7 @@ def get_single_character(id):
 @app.route('/character', methods=['POST'])
 def create_character():
     request_body = request.get_json()
-    character = Character(name=request_body["name"], birth_year=request_body["birth_year"], eye_color=request_body["eye_color"], gender=request_body["gender"], hair_color=request_body["hair_color"], height=request_body["height"], skin_color=request_body["skin_color"])
+    character = Character(name=request_body["name"], birth_year=request_body["birth_year"], eye_color=request_body["eye_color"], gender=request_body["gender"], hair_color=request_body["hair_color"], height=request_body["height"], skin_color=request_body["skin_color"], item_type=request_body["item_type"])
     db.session.add(character)
     db.session.commit()
     print("Character created: ", request_body)
@@ -211,7 +211,7 @@ def get_single_planet(id):
 @app.route('/planet', methods=['POST'])
 def create_planet():
     request_body = request.get_json()
-    planet = Planet(name=request_body["name"], climate=request_body["climate"], diameter=request_body["diameter"], population=request_body["population"], rotation_period=request_body["rotation_period"], terrain=request_body["terrain"])
+    planet = Planet(name=request_body["name"], climate=request_body["climate"], diameter=request_body["diameter"], population=request_body["population"], rotation_period=request_body["rotation_period"], terrain=request_body["terrain"], item_type=request_body["item_type"])
     db.session.add(planet)
     db.session.commit()
     print("Planet created: ", request_body)
@@ -268,8 +268,6 @@ def get_all_favorite():
     user = User.query.get(current_user_id)
     if user is None:
         raise APIException('User not found', status_code=404)
-    
-    all_favorites = Favorite.query.all()
 
     all_favorites = Service.get_favorites(current_user_id)
     return jsonify(all_favorites), 200
