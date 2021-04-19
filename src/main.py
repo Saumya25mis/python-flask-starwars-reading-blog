@@ -278,7 +278,11 @@ def get_all_favorite():
 @app.route('/favorite_raw', methods=['GET'])
 @jwt_required()
 def get_all_favorite_raw():
-    all_favorite_raw = Favorite.query.all()
+
+    # Access the identity of the current user with get_jwt_identity()
+    current_user_id = get_jwt_identity()
+
+    all_favorite_raw = Favorite.query.filter_by(user_id=current_user_id).all()
     all_favorite_raw = list(map(lambda x: x.serialize(), all_favorite_raw)) 
     print("GET all_favorite_raw: ", all_favorite_raw)
     return jsonify(all_favorite_raw), 200
