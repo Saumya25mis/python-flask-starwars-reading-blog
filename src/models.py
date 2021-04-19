@@ -1,5 +1,5 @@
 
-# IMPORTANT: run 'URL/populate' to populate database for testing purposes
+# IMPORTANT: run in Postman GET 'URL/populate' to populate database for testing purposes
 
 from flask_sqlalchemy import SQLAlchemy
 

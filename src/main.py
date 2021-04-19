@@ -1,5 +1,5 @@
 
-# IMPORTANT: run 'URL/populate' to populate database for testing purposes ('/populate' endpoint created below)
+# IMPORTANT: run in Postman GET 'URL/populate' to populate database for testing purposes ('/populate' endpoint created below)
 
 """
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
