@@ -1,3 +1,6 @@
+
+# IMPORTANT: run 'URL/populate' to populate database for testing purposes ('/populate' endpoint created below)
+
 """
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
@@ -297,6 +300,32 @@ def delete_favorite(id):
     }
     return jsonify(response_body), 200
 
+
+# Populate DB
+@app.route('/populate', methods=['GET'])
+def populate():
+    u1 = User(username='user01', email='user01@example.com', password="01")
+    u2 = User(username='user02', email='user02@example.com', password="02")
+    u3 = User(username='user03', email='user03@example.com', password="03")
+
+    c1 = Character(name='Luke Skywalker', birth_year='19BBY', gender='male', height='172.0', eye_color='blue', hair_color='blond', skin_color='fair', item_type='character')
+    c2 = Character(name='C-3PO', birth_year='112BBY', gender='', height='167.0', eye_color='yellow', hair_color='n/a', skin_color='gold', item_type='character')
+    c3 = Character(name='R2-D2', birth_year='33BBY', gender='n/a', height='96.0', eye_color='red', hair_color='n/a', skin_color='white, blue', item_type='character')
+    c4 = Character(name='Darth Vader', birth_year='41.9BBY', gender='male', height='202.0', eye_color='yellow', hair_color='none', skin_color='white', item_type='character')
+    c5 = Character(name='Leia Organa', birth_year='19BBY', gender='female', height='150.0', eye_color='brown', hair_color='brown', skin_color='light', item_type='character')
+    c6 = Character(name='Owen Lars', birth_year='52BBY', gender='male', height='178.0', eye_color='blue', hair_color='brown, grey', skin_color='light', item_type='character')
+
+    p1 = Planet(name='Tatooine', population='200000', terrain='desert', diameter='10465.0', climate='arid', rotation_period='23.0', item_type='planet')
+    p2 = Planet(name='Alderaan', population='2000000000', terrain='grasslands, mountains', diameter='12500.0', climate='temperate', rotation_period='24.0', item_type='planet')
+    p3 = Planet(name='Yavin IV', population='1000', terrain='jungle, rainforests', diameter='10200.0', climate='temperate, tropical', rotation_period='24.0', item_type='planet')
+    p4 = Planet(name='Hoth', population='5000', terrain='tundra, ice caves, mountain ranges', diameter='7200.0', climate='frozen', rotation_period='23.0', item_type='planet')
+    p5 = Planet(name='Dagobah', population='6500', terrain='swamp, jungles', diameter='8900.0', climate='murky', rotation_period='23.0', item_type='planet')
+    p6 = Planet(name='Bespin', population='6000000', terrain='gas giant', diameter='118000.0', climate='temperate', rotation_period='12.0', item_type='planet')
+
+    db.session.add_all([u1, u2, u3, c1, c2, c3, c4, c5, c6, p1, p2, p3, p4, p5, p6])
+    db.session.commit()
+
+    return('Data populated')
 
 
 # These two lines should always be at the end of the main.py file.

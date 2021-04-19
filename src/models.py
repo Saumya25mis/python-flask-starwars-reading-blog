@@ -1,3 +1,6 @@
+
+# IMPORTANT: run 'URL/populate' to populate database for testing purposes
+
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
