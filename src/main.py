@@ -275,6 +275,14 @@ def get_all_favorite():
     all_favorites = Service.get_favorites(current_user_id)
     return jsonify(all_favorites), 200
 
+@app.route('/favorite_raw', methods=['GET'])
+@jwt_required()
+def get_all_favorite_raw():
+    all_favorite_raw = Favorite.query.all()
+    all_favorite_raw = list(map(lambda x: x.serialize(), all_favorite_raw)) 
+    print("GET all_favorite_raw: ", all_favorite_raw)
+    return jsonify(all_favorite_raw), 200
+
 @app.route('/favorite', methods=['POST'])
 @jwt_required()
 def add_favorite():
